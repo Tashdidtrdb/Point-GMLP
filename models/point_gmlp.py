@@ -2,7 +2,7 @@ import torch
 from torch import nn
 from einops.layers.torch import Rearrange, Reduce
 from random import randrange
-from blocks import Residual, PreNorm, PostNorm, gMLPBlock
+from models.blocks import Residual, PreNorm, PostNorm, gMLPBlock
 
 def uniform_sampling(n: int, D: int, E: int) -> nn.Module:
     """Uniform sampling embedding, that creates chunks/patches of points.
