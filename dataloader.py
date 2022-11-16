@@ -36,12 +36,12 @@ class SHRECLoader(data.Dataset):
 
         point_clouds = np.load(
             insert(self.prefix.format(splitLine[0], splitLine[1], splitLine[2], splitLine[3]), "Processed_", 2)
-            + "/pts_label.npy")[:, :, :7]
+            + "/pts_label.npy")[:, :, :8]
 
         point_clouds = point_clouds[self.key_frame_sampling(len(point_clouds), self.framerate)]
         for i in range(self.framerate):
             point_clouds[i, :, 3] = i
-        point_clouds = np.dstack((point_clouds, np.zeros_like(point_clouds)))[:, :, :7]
+        point_clouds = np.dstack((point_clouds, np.zeros_like(point_clouds)))[:, :, :8]
         point_clouds = self.normalize_ptclouds(point_clouds, self.framerate)
 
         depth_images = np.load(

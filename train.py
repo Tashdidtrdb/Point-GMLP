@@ -6,7 +6,7 @@ import math
 import time
 import matplotlib.pyplot as plt
 import os
-from utils.misc import log,calc_step,save_model
+from utils.misc import log, calc_step, save_model
 
 def evaluate(model: nn.Module, dataloader: DataLoader, criterion: Callable, device: str):
     acc = 0
@@ -28,7 +28,7 @@ def evaluate(model: nn.Module, dataloader: DataLoader, criterion: Callable, devi
     return acc, avg_loss
 
 def train(model: nn.Module, train_loader: DataLoader, val_loader: DataLoader, criterion: Callable, optimizer: optim.Optimizer, n_epoch: int, device: str,schedulers: dict,config):
-    if not os.path.isfile('./saved_files/'):
+    if not os.path.isdir('./saved_files/'):
         os.mkdir('saved_files')
 
     best_acc = 0
@@ -62,6 +62,7 @@ def train(model: nn.Module, train_loader: DataLoader, val_loader: DataLoader, cr
             loss = criterion(output, labels)
             loss.backward()
             optimizer.step()
+
             # schedulers          
             if schedulers["warmup"] is not None and epoch < 10:
                 schedulers["warmup"].step()
@@ -78,8 +79,8 @@ def train(model: nn.Module, train_loader: DataLoader, val_loader: DataLoader, cr
         
         log_dict = {"epoch": epoch, "time_per_epoch": time.time() - t0, "train_acc": acc/(len(train_loader.dataset)), "avg_loss_per_ep": avg_loss/len(train_loader)}
         log(log_dict, step,config)
-        wait+=1
-        if (epoch+1) % 1 == 0:
+        wait += 1
+        if (epoch + 1) % 1 == 0:
             val_acc, val_loss = evaluate(model, val_loader, criterion, device)
             val_accuracies.append(val_acc)
             val_losses.append(val_loss)
@@ -98,9 +99,9 @@ def train(model: nn.Module, train_loader: DataLoader, val_loader: DataLoader, cr
             
             
 
-    return accuracies, losses,val_accuracies,val_losses,best_model
+    return accuracies, losses, val_accuracies, val_losses, best_model
 
 
 def test(model: nn.Module, criterion: Callable, test_loader: DataLoader,device: str):
     test_acc, test_loss = evaluate(model, test_loader, criterion, device)
-    return test_acc,test_loss
+    return test_acc, test_loss
