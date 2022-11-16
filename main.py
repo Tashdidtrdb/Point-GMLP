@@ -7,7 +7,7 @@ import math
 import time
 import matplotlib.pyplot as plt
 import os
-#import wandb
+import wandb
 from utils.loss import LabelSmoothingLoss
 from utils.scheduler import WarmUpLR, get_scheduler
 from utils.misc import count_params, seed_everything
@@ -69,7 +69,7 @@ def training_pipeline():
     schedulers["scheduler"] = get_scheduler(optimizer, "cosine_annealing", total_iters)
 
 
-    #os.environ["WANDB_API_KEY"] = "87fd3cc00cd83c882da8bf145ecc92d00dae8bf0"
+    os.environ["WANDB_API_KEY"] = "87fd3cc00cd83c882da8bf145ecc92d00dae8bf0"
     #Adjust confugs for each training
     config = {
         "learning_rate": 0.001,
@@ -78,10 +78,10 @@ def training_pipeline():
         "optimizer" : "adamW",
         "criterion" : "LabelSmoothingLoss"
     }
-
-    #with wandb.init(project='thesis-test-1', name='Depth Image Quantization', config=config):
-    accuracies, losses,val_accuracies,val_losses,best_model = train(model, train_loader, val_loader, criterion, optimizer, 30, device, schedulers, config)
-    test_acc, test_loss = test(best_model, criterion, test_loader, device)
+    wandb.init(project="Point-GLMP", entity="team-4")
+    with wandb.init(project="Point-GLMP", name='Initial Run', config=config):
+        accuracies, losses,val_accuracies,val_losses,best_model = train(model, train_loader, val_loader, criterion, optimizer, 30, device, schedulers, config)
+        test_acc, test_loss = test(best_model, criterion, test_loader, device)
 
     print("\nTest Accuracy :",test_acc,"\nTest Loss : ", test_loss)
 

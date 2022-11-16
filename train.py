@@ -7,6 +7,7 @@ import time
 import matplotlib.pyplot as plt
 import os
 from utils.misc import log, calc_step, save_model
+import wandb
 
 def evaluate(model: nn.Module, dataloader: DataLoader, criterion: Callable, device: str):
     acc = 0
@@ -78,6 +79,7 @@ def train(model: nn.Module, train_loader: DataLoader, val_loader: DataLoader, cr
 
         
         log_dict = {"epoch": epoch, "time_per_epoch": time.time() - t0, "train_acc": acc/(len(train_loader.dataset)), "avg_loss_per_ep": avg_loss/len(train_loader)}
+        wandb.log(log_dict)
         log(log_dict, step,config)
         wait += 1
         if (epoch + 1) % 1 == 0:
