@@ -79,14 +79,16 @@ def train(model: nn.Module, train_loader: DataLoader, val_loader: DataLoader, cr
 
         
         log_dict = {"epoch": epoch, "time_per_epoch": time.time() - t0, "train_acc": acc/(len(train_loader.dataset)), "avg_loss_per_ep": avg_loss/len(train_loader)}
-        wandb.log(log_dict)
+        
         log(log_dict, step,config)
         wait += 1
         if (epoch + 1) % 1 == 0:
             val_acc, val_loss = evaluate(model, val_loader, criterion, device)
             val_accuracies.append(val_acc)
             val_losses.append(val_loss)
-            log_dict = {"epoch": epoch, "val_loss": val_loss, "val_acc": val_acc}
+            log_dict = {"val_loss": val_loss, "val_acc": val_acc}
+            wandb.log({"train_acc": acc/(len(train_loader.dataset)), "avg_loss_per_ep": avg_loss/len(train_loader),"val_loss": val_loss, "val_acc": val_acc}, step=epoch)
+
             log(log_dict, step, config)
           
             if val_acc > best_acc:
@@ -106,4 +108,5 @@ def train(model: nn.Module, train_loader: DataLoader, val_loader: DataLoader, cr
 
 def test(model: nn.Module, criterion: Callable, test_loader: DataLoader,device: str):
     test_acc, test_loss = evaluate(model, test_loader, criterion, device)
+    wandb.log({"test_accuracy":test_acc,"test_loss":test_loss})
     return test_acc, test_loss
