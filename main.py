@@ -78,7 +78,7 @@ def training_pipeline():
         "optimizer" : "adamW",
         "criterion" : "LabelSmoothingLoss"
     }
-    with wandb.init(project="Point-GLMP", name='Initial Run', config=config):
+    with wandb.init(project="Point-GLMP", name='Initial Run', config=config, entity = 'team-4'):
         accuracies, losses,val_accuracies,val_losses,best_model = train(model, train_loader, val_loader, criterion, optimizer, 30, device, schedulers, config)
         test_acc, test_loss = test(best_model, criterion, test_loader, device)
 
