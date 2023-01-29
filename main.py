@@ -19,6 +19,19 @@ from utils.config_parser import get_config
 # run for the model
 ################################
 
+def plot_chart(stats):
+    plt.plot(stats[0], 'r', label = 'train_acc')
+    plt.plot(stats[2], 'g', label = 'val_acc')
+    plt.title('accuracies')
+    plt.legend(loc = "lower right")
+
+    plt.show()
+    plt.plot(stats[3], 'b', label = 'val_loss')
+    plt.plot(stats[1], 'y', label = 'train_loss')
+    plt.title('losses')
+    plt.legend(loc = "upper right")
+    plt.show()
+
 def training_pipeline(config):
 
     #create the model
@@ -37,7 +50,7 @@ def training_pipeline(config):
 
     ###########  Criterion Definition  ###########
     criterion = LabelSmoothingLoss(
-        num_classes = config["hparams"]["model"]["num_classes"],
+        num_classes = config["hparams"]["model"]["model_kwargs"]["num_classes"],
         smoothing = config["hparams"]["l_smooth"]
     ) 
 
@@ -77,29 +90,19 @@ def training_pipeline(config):
         total_iters = len(train_loader) * max(1, (config["hparams"]["n_epochs"] - config["hparams"]["scheduler"]["n_warmup"]))
         schedulers["scheduler"] = get_scheduler(optimizer, config["hparams"]["scheduler"]["scheduler_type"], total_iters)
 
-    os.environ["WANDB_API_KEY"] = config["exp"]["wandb_api_key"]
+    if config["exp"]["wandb"]:
+        if config["exp"]["wandb_api_key"] is not None:
+            with open(config["exp"]["wandb_api_key"], "r") as f:
+                os.environ["WANDB_API_KEY"] = f.read()
    
-    with wandb.init(project=config["exp"]["proj_name"], name=config["exp"]["exp_name"], config=config["hparams"], entity = config["exp"]["entity"]):
-        accuracies, losses,val_accuracies,val_losses,best_model = train(model, train_loader, val_loader, criterion, optimizer, config["hparams"]["n_epochs"], config["hparams"]["device"], schedulers, config)
-        test_acc, test_loss = test(best_model, criterion, test_loader, config["hparams"]["device"])
+        wandb.init(project=config["exp"]["proj_name"], name=config["exp"]["exp_name"], config=config["hparams"], entity = config["exp"]["entity"])
+    
+    stats_train = train(model, train_loader, val_loader, criterion, optimizer, config["hparams"]["n_epochs"], config["hparams"]["device"], schedulers, config)
+    test_acc, test_loss = test(stats_train[4], criterion, test_loader, config["hparams"]["device"])
 
+    plot_chart(stats_train)
     print("\nTest Accuracy :",test_acc,"\nTest Loss : ", test_loss)
-
-    plt.plot(accuracies, 'r', label = 'train_acc')
-    plt.plot(val_accuracies, 'g', label = 'val_acc')
-    plt.title('accuracies')
-    plt.legend(loc = "lower right")
-
-    plt.show()
-    plt.plot(val_losses, 'b', label = 'val_loss')
-    plt.plot(losses, 'y', label = 'train_loss')
-    plt.title('losses')
-    plt.legend(loc = "upper right")
-    plt.show()
-
     print("Completed run.")
-
-    # completed training
 
 def main(args):
     config = get_config(args.conf)

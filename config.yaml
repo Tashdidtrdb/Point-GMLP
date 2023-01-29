@@ -3,7 +3,7 @@ data_list_path: ./data/informations_troncage_sequences.txt
 
 exp:
     wandb: True
-    wandb_api_key: 87fd3cc00cd83c882da8bf145ecc92d00dae8bf0
+    wandb_api_key: ./wandb_key.txt
     proj_name: Point-GLMP
     exp_dir: ./runs/
     exp_name:       
@@ -45,28 +45,5 @@ hparams:
         n_warmup: 10
         scheduler_type: cosine_annealing
 
-    transforms:
-        preprocess:
-            gvar:
-                g_min: 155
-                g_max: 255
-                eta: 10
-                near_depth_thresh: 200
-            
-            resize:
-                H_new: 50
-                W_new: 50
-        aug:
-            joint_shift_scale_rotate:
-                shift_limit: 0.2
-                scale_limit: 0.2
-                rotate_limit: 20
-            
-            image_shift_scale_rotate:
-                shift_limit: 0.2
-                scale_limit: 0.2
-                rotate_limit: 20
-            
-            time_shift:
-                p: 0.5    
-                frame_limit: 3
+    #transforms:
+        
