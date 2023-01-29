@@ -46,7 +46,8 @@ class PointGMLP(nn.Module):
     def __init__(
         self,
         input_size: list = [32, 256, 8], # (T, N, D)
-        tube_size: list = [16, 8, 4],    # (t, n, d)
+        patch_method: str = "tubelet",   # "tubelet" or "uniform"
+        tube_size: list = [16, 8, 8],    # (t, n, d); should equal (1, n, D) for "uniform"
         dim: int = 64,                   # model embedding dim, E
         depth: int = 12,                 # how many consecutive blocks in the model
         ff_mult: int = 4,                # embedding projection factor
@@ -59,15 +60,23 @@ class PointGMLP(nn.Module):
         P_Norm = PreNorm if pre_norm else PostNorm
         
         T, N, D = input_size
-        t, n, d = tube_size
-        num_tubes = int((T * N * D) / (t * n * d))
         
         dim_ff = dim * ff_mult
         
         self.prob_survival = prob_survival
 
-        self.to_patch_embedding = tubelet_sampling(t, n, d, dim)
+        t, n, d = tube_size
+        num_tubes = int((T * N * D) / (t * n * d))
         
+        # check here
+        if patch_method == "tubelet":
+            self.to_patch_embedding = tubelet_sampling(t, n, d, dim)
+        elif patch_method == "uniform":
+            assert (t, d) == (1, D), "Uniform sampling only splits input along number-of-point (N) dimension and operates per time frame."
+            self.to_patch_embedding = uniform_sampling(n, D, dim)
+        else:
+            raise ValueError(f"Unsupported patch method: {patch_method}")
+
         self.layers = nn.ModuleList(
             [Residual(P_Norm(dim, gMLPBlock(dim=dim, dim_ff=dim_ff, seq_len=num_tubes))) for i in range(depth)]
         )

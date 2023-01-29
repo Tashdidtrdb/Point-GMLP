@@ -1,0 +1,72 @@
+data_root:  ./data/
+data_list_path: ./data/informations_troncage_sequences.txt
+
+exp:
+    wandb: True
+    wandb_api_key: 87fd3cc00cd83c882da8bf145ecc92d00dae8bf0
+    proj_name: Point-GLMP
+    exp_dir: ./runs/
+    exp_name:       
+    device: cuda
+    entity : team-4
+    log_freq: 20    # log every l_f steps
+    val_freq: 1     # validate every v_f epochs; -1 means only at the end
+    n_workers: 1
+    
+    
+
+hparams:
+    seed: 0
+    batch_size: 4
+    n_epochs: 30
+    l_smooth: 0.1
+    
+    model:
+        name: PointGLMP
+        type: 
+        model_kwargs:
+            input_size: [32, 256, 8]    # (T, N, D)
+            patch_method : "tubelet"
+            tube_size: [16, 8, 4]      # (t, n, d)
+            dim: 64                   # model embedding dim, E
+            depth: 12                 # how many consecutive blocks in the model
+            ff_mult: 4                # embedding projection factor
+            prob_survival: 0.9      # probability that a block won't be dropped at training time
+            pre_norm: False          # pre-norm or post-norm
+            num_classes: 14  
+        
+    optimizer:
+        opt_type: adamw
+        opt_kwargs:
+            lr: 0.001
+            weight_decay: 0.1
+    
+    scheduler:
+        n_warmup: 10
+        scheduler_type: cosine_annealing
+
+    transforms:
+        preprocess:
+            gvar:
+                g_min: 155
+                g_max: 255
+                eta: 10
+                near_depth_thresh: 200
+            
+            resize:
+                H_new: 50
+                W_new: 50
+        aug:
+            joint_shift_scale_rotate:
+                shift_limit: 0.2
+                scale_limit: 0.2
+                rotate_limit: 20
+            
+            image_shift_scale_rotate:
+                shift_limit: 0.2
+                scale_limit: 0.2
+                rotate_limit: 20
+            
+            time_shift:
+                p: 0.5    
+                frame_limit: 3

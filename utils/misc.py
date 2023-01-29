@@ -2,6 +2,7 @@
 
 import torch
 from torch import nn, optim
+from models.point_gmlp import PointGMLP
 import numpy as np
 import random
 import os
@@ -72,15 +73,14 @@ def log(log_dict: dict, step: int, config: dict) -> None:
     print(log_message)
 
 
-# def get_model(model_config):
-#     if model_config["name"] == "feature_fusion":
-#         fusion_model = FeatureFusionNet
-#     elif model_config["name"] == "score_fusion":
-#         fusion_model = ScoreFusionNet
-#     else:
-#         raise ValueError(f"Invalid model_name {model_config['name']}.")
+def get_model(model_config):
+    if model_config["name"] == "PointGLMP":
+        model = PointGMLP(**model_config["model_kwargs"])
+        return model 
+    else:
+        raise ValueError(f"Invalid model_name {model_config['name']}.")
 
-#     return fusion_model(**model_config)
+   
 
 def save_model(epoch: int, save_path: str, net: nn.Module, optimizer : optim.Optimizer = None, log_file : str = None) -> None:
     """Saves checkpoint.
